@@ -44,7 +44,7 @@ spec:
         - name: fullnameOverride
           value: namespace-1
         - name: mainRepo
-          value: https://github.com/burhanuguz/test-cluster
+          value: https://github.com/burhanuguz/test-cluster.git
     repoURL: 'https://burhanuguz.github.io/helm-chart-gitops/'
     targetRevision: 0.1.1
   syncPolicy:
