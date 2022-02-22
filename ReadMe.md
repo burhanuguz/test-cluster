@@ -1,4 +1,5 @@
 
+  
 # Deploy Apps using ArgoCD via Helm Charts(GitOps) 
 
 ## Prerequisites
@@ -11,8 +12,8 @@ In this repository you will find how to implement Git centric deployments to you
 - ArgoCD holds the information about the repo's it watches with Application Manifest file, like in [bgd-app](https://raw.githubusercontent.com/redhat-developer-demos/openshift-gitops-examples/main/components/applications/bgd-app.yaml) example.
 - We can add Application YAML files to the repo ArgoCD watches. You will create one Git Repo and add it to your ArgoCD manually only once, and then putting Application Manifest files to repo will create chained creation of **Namespace** and **Deployments**. The main idea is this in this explanation.
 - That's where we need Helm most. Because of creation of **namespaces** and **deployments** are expected to be the same mostly, I have created two Helm Chart for them.
-- ArgoCD Application Manifest File for creating **Namespace**'s and **Deployment**'s are in the templates folder.
-	- [deployment-template.yaml] - [namespaces-template.yaml]
+- ArgoCD Application Manifest File for creating **Namespace**'s and **Deployment**'s are the same and in the templates folder.
+	- [template.yaml](https://github.com/burhanuguz/test-cluster/blob/master/templates/template.yaml)
 - You can find the Helm Chart's used in this repo: https://github.com/burhanuguz/helm-chart-gitops/
 
 It might be confusing at start but once you get the idea, your deployments and namespaces creations will only need git push at the end :)
@@ -120,6 +121,8 @@ git add --all; git commit -m "${APPLICATIONNAME}"; git push origin master
 ```
 
 ## Testing
+Fully functional repo in here: https://github.com/burhanuguz/test-cluster/
+
 You can deploy ArgoCD on Openshift with [Openshift Playground](https://developers.redhat.com/courses/explore-openshift/openshift-49-playground) via Red Hat GitOps Operator.
 
 After deploying ArgoCD, you will need to define some RBAC rules to the **openshift-gitops-argocd-application-controller** for Openshift GitOps. For simplicity, I gave cluster-admin privileges in the test-cluster that is online on Openshift Playground.
@@ -155,3 +158,5 @@ spec:
       - ApplyOutOfSyncOnly=true
 EOF
 ```
+Lastly the test is here for it.
+![1](https://user-images.githubusercontent.com/59168275/155138653-4d25bced-2f53-46ea-a0cd-f4095e288967.gif)
