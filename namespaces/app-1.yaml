@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: namespace-1-app-1
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: namespace-1
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    chart: deploypackage
+    helm:
+      valueFiles:
+        - values.yaml
+      values: |
+        replicaCount: 1
+        
+        image:
+          repository: "centos/httpd-24-centos7"
+          pullPolicy: Always
+          # Overrides the image tag whose default is the chart appVersion.
+          tag: "latest"
+        
+        ports:
+          - name: &referencedPortName http
+            containerPort: &referencedPort 8080
+            protocol: TCP
+        
+        livenessProbe:
+          tcpSocket:
+            port: http
+          failureThreshold: 10
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+        
+        readinessProbe:
+          tcpSocket:
+            port: http
+          failureThreshold: 100
+          periodSeconds: 10
+          initialDelaySeconds: 5
+          successThreshold: 1
+        
+        service:
+          type: ClusterIP
+          ports:
+          - port: *referencedPort
+            targetPort: *referencedPortName
+            protocol: TCP
+            name: *referencedPortName
+        
+        route:
+          enabled: true
+          targetServicePort: *referencedPortName
+      parameters:
+        - name: fullnameOverride
+          value: app-1
+        - name: mainRepo
+          value: https://github.com/burhanuguz/test-cluster
+    repoURL: 'https://burhanuguz.github.io/helm-chart-gitops/'
+    targetRevision: 0.1.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+      limit: 2
+    syncOptions:
+      - Validate=false
+      - PruneLast=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

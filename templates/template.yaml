@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${ARGOAPPNAME}
+  namespace: ${ARGOCDNAMESPACE}
+spec:
+  destination:
+    namespace: ${NAMESPACE}
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    chart: ${CHARTNAME}
+    helm:
+      valueFiles:
+        - values.yaml
+      values: ${valuesYAML}
+      parameters:
+        - name: fullnameOverride
+          value: ${fullnameOverride}
+        - name: mainRepo
+          value: ${GITREPO}
+    repoURL: '${CHARTURL}'
+    targetRevision: ${CHARTVERSION}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+      limit: 2
+    syncOptions:
+      - Validate=false
+      - PruneLast=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+

@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: namespace-1
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: namespace-1
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    chart: new-namespace
+    helm:
+      valueFiles:
+        - values.yaml
+      values: |
+        resourceQuota:
+          requests.storage: "15Gi"
+          requests.cpu: "5"
+          requests.memory: 17Gi
+          limits.cpu: "17"
+          limits.memory: 25Gi
+        
+        nodeSelector: {}
+        
+        tolerations: []
+        
+        affinity: {}
+        
+        limits:
+          default:
+            cpu: 150m
+            memory: 900Mi
+          defaultRequest:
+            cpu: 100m
+            memory: 600Mi
+          max:
+            cpu: 1
+            memory: 2100Mi
+        
+        conjur:
+          enabled: false
+      parameters:
+        - name: fullnameOverride
+          value: namespace-1
+        - name: mainRepo
+          value: https://github.com/burhanuguz/test-cluster
+    repoURL: 'https://burhanuguz.github.io/helm-chart-gitops/'
+    targetRevision: 0.1.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+      limit: 2
+    syncOptions:
+      - Validate=false
+      - PruneLast=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
